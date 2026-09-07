@@ -1,0 +1,800 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minha Quitandinha — Funil de Condomínios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --verde-fundo:#0A3227;
+    --verde-fundo-2:#072A20;
+    --verde-coluna:rgba(255,255,255,.06);
+    --verde-coluna-borda:rgba(255,255,255,.10);
+    --verde-escuro:#062018;
+    --creme:#FBFAF5;
+    --tinta:#123024;
+    --tinta-suave:#4B6459;
+    --milho:#E9B23C;
+    --ok:#2FA45F;
+    --andamento:#E9B23C;
+    --perdido:#D9534A;
+    --claro-70:rgba(255,255,255,.70);
+    --claro-45:rgba(255,255,255,.45);
+    --raio:10px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:"Inter",system-ui,-apple-system,Segoe UI,sans-serif;
+    background:
+      radial-gradient(900px 500px at 12% -10%, #14513C 0%, transparent 60%),
+      linear-gradient(180deg, var(--verde-fundo) 0%, var(--verde-fundo-2) 100%);
+    background-attachment:fixed;
+    color:#fff;
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;
+  }
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+
+  /* ---------- Barra superior ---------- */
+  header.topo{
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    padding:14px 20px;
+    background:rgba(0,0,0,.22);
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .marca{display:flex;align-items:center;gap:10px;margin-right:4px}
+  .marca .cesta{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--milho);
+    display:grid;place-items:center;
+    box-shadow:0 2px 0 rgba(0,0,0,.25);
+  }
+  .marca h1{
+    font-family:"Bricolage Grotesque","Inter",sans-serif;
+    font-weight:800;font-size:19px;letter-spacing:-.02em;margin:0;line-height:1;
+  }
+  .marca span{display:block;font-size:11.5px;color:var(--claro-45);font-weight:500;margin-top:3px}
+
+  .ferramentas{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+  .campo-busca{position:relative}
+  .campo-busca input{
+    width:220px;padding:9px 12px 9px 32px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);
+    color:#fff;outline:none;
+  }
+  .campo-busca input::placeholder{color:var(--claro-45)}
+  .campo-busca input:focus{border-color:var(--milho);background:rgba(255,255,255,.12)}
+  .campo-busca svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5}
+
+  select.filtro{
+    padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.07);outline:none;
+  }
+  select.filtro option{background:#0B3B2D;color:#fff}
+
+  .btn{
+    padding:9px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.07);font-weight:500;
+  }
+  .btn:hover{background:rgba(255,255,255,.14)}
+  .btn:focus-visible,.campo-busca input:focus-visible,select:focus-visible{outline:2px solid var(--milho);outline-offset:2px}
+  .btn-destaque{
+    background:var(--milho);color:#22180A;border-color:transparent;font-weight:600;
+    box-shadow:0 2px 0 rgba(0,0,0,.28);
+  }
+  .btn-destaque:hover{background:#F2BF4B}
+
+  /* ---------- Quadro ---------- */
+  main.quadro{
+    flex:1;display:flex;gap:12px;align-items:flex-start;
+    padding:16px 20px 24px;overflow-x:auto;overflow-y:hidden;
+  }
+  .coluna{
+    flex:0 0 288px;max-height:100%;
+    display:flex;flex-direction:column;
+    background:var(--verde-coluna);
+    border:1px solid var(--verde-coluna-borda);
+    border-radius:12px;
+    backdrop-filter:blur(4px);
+  }
+  .coluna.alvo{background:rgba(233,178,60,.16);border-color:var(--milho)}
+  .coluna > .cabeca{
+    display:flex;align-items:center;gap:8px;padding:12px 12px 8px;
+  }
+  .coluna .cabeca h2{
+    font-family:"Bricolage Grotesque","Inter",sans-serif;
+    font-size:14px;font-weight:700;margin:0;letter-spacing:-.01em;
+  }
+  .contagem{
+    margin-left:auto;font-size:12px;color:var(--claro-45);
+    background:rgba(0,0,0,.22);padding:2px 8px;border-radius:20px;
+  }
+  .trilha{
+    height:3px;border-radius:3px;margin:0 12px 8px;background:rgba(255,255,255,.14);
+  }
+  .trilha i{display:block;height:100%;border-radius:3px;background:var(--milho)}
+  .lista{
+    flex:1;overflow-y:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:8px;
+    min-height:60px;
+  }
+  .lista::-webkit-scrollbar{width:8px}
+  .lista::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:8px}
+  .rodape-coluna{padding:0 8px 10px}
+  .add-coluna{
+    width:100%;text-align:left;padding:8px 10px;border-radius:8px;border:0;
+    background:transparent;color:var(--claro-45);font-size:13px;
+  }
+  .add-coluna:hover{background:rgba(255,255,255,.10);color:#fff}
+
+  /* ---------- Cartão ---------- */
+  .cartao{
+    background:var(--creme);color:var(--tinta);
+    border-radius:var(--raio);padding:10px 11px 9px;
+    box-shadow:0 1px 0 rgba(0,0,0,.28);
+    border-left:4px solid transparent;
+    cursor:grab;
+  }
+  .cartao:hover{box-shadow:0 0 0 2px var(--milho),0 1px 0 rgba(0,0,0,.28)}
+  .cartao.arrastando{opacity:.35;cursor:grabbing}
+  .cartao.st-verde{border-left-color:var(--ok)}
+  .cartao.st-amarelo{border-left-color:var(--andamento)}
+  .cartao.st-vermelho{border-left-color:var(--perdido)}
+  .cartao.st-nenhum{border-left-color:#C9D2CD}
+  .cartao h3{font-size:14px;font-weight:600;margin:0 0 2px;line-height:1.3}
+  .cartao .endereco{font-size:12px;color:var(--tinta-suave);margin:0 0 8px;line-height:1.35}
+  .etiquetas{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+  .etiqueta{
+    font-size:11px;font-weight:500;padding:2px 7px;border-radius:6px;
+    background:#EAEFE9;color:#3B5B4C;
+  }
+  .etiqueta.alerta{background:#FCEBD2;color:#8A5B12}
+  .etiqueta.perigo{background:#FBE3E1;color:#963029}
+  .meta-cartao{
+    display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tinta-suave);
+    border-top:1px solid #E6E4DA;padding-top:7px;
+  }
+  .meta-cartao .quem{
+    margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-weight:500;
+  }
+  .inicial{
+    width:19px;height:19px;border-radius:50%;background:#123024;color:#fff;
+    display:grid;place-items:center;font-size:10px;font-weight:600;
+  }
+  .vazio{
+    font-size:12.5px;color:var(--claro-45);padding:10px;line-height:1.5;
+    border:1px dashed rgba(255,255,255,.16);border-radius:var(--raio);
+  }
+
+  /* ---------- Painel lateral ---------- */
+  .fundo-escuro{
+    position:fixed;inset:0;background:rgba(3,18,13,.6);
+    display:none;z-index:40;
+  }
+  .fundo-escuro.aberto{display:block}
+  .painel{
+    position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);
+    background:var(--creme);color:var(--tinta);z-index:50;
+    transform:translateX(100%);transition:transform .22s ease;
+    display:flex;flex-direction:column;
+  }
+  .painel.aberto{transform:none}
+  @media (prefers-reduced-motion:reduce){.painel{transition:none}}
+  .painel .cabeca{
+    padding:16px 20px;border-bottom:1px solid #E6E4DA;
+    display:flex;align-items:center;gap:12px;
+  }
+  .painel .cabeca h2{
+    font-family:"Bricolage Grotesque","Inter",sans-serif;
+    font-size:17px;margin:0;font-weight:700;
+  }
+  .fechar{
+    margin-left:auto;border:0;background:#EAEFE9;color:var(--tinta);
+    width:30px;height:30px;border-radius:8px;font-size:16px;line-height:1;
+  }
+  .fechar:hover{background:#DCE4DC}
+  .corpo{flex:1;overflow-y:auto;padding:18px 20px 26px}
+
+  fieldset{border:0;padding:0;margin:0 0 22px}
+  legend{
+    font-family:"Bricolage Grotesque","Inter",sans-serif;
+    font-size:13px;font-weight:700;color:#2B6A4E;margin-bottom:10px;padding:0;
+  }
+  .linha{display:flex;gap:12px}
+  .linha > *{flex:1;min-width:0}
+  label.campo{display:block;margin-bottom:12px}
+  label.campo > span{display:block;font-size:12px;color:var(--tinta-suave);margin-bottom:4px}
+  input.txt,select.txt,textarea.txt{
+    width:100%;padding:9px 10px;border-radius:8px;
+    border:1px solid #D6D9D0;background:#fff;color:var(--tinta);outline:none;
+  }
+  textarea.txt{resize:vertical;min-height:78px;line-height:1.5}
+  input.txt:focus,select.txt:focus,textarea.txt:focus{border-color:#2B6A4E;box-shadow:0 0 0 3px rgba(43,106,78,.14)}
+
+  .semaforo{display:flex;gap:8px;flex-wrap:wrap}
+  .semaforo label{
+    flex:1;min-width:110px;display:flex;align-items:center;gap:8px;
+    padding:9px 10px;border-radius:8px;border:1px solid #D6D9D0;background:#fff;
+    font-size:13px;cursor:pointer;
+  }
+  .semaforo input{accent-color:#2B6A4E;margin:0}
+  .semaforo label.on{border-color:#2B6A4E;background:#F0F6F1;font-weight:500}
+  .bolinha{width:11px;height:11px;border-radius:50%;flex:none}
+  .b-verde{background:var(--ok)}.b-amarelo{background:var(--andamento)}
+  .b-vermelho{background:var(--perdido)}.b-nenhum{background:#C9D2CD}
+
+  .historico{
+    background:#F0F1EA;border-radius:10px;padding:12px 14px;font-size:12.5px;
+    color:var(--tinta-suave);line-height:1.7;
+  }
+  .historico b{color:var(--tinta);font-weight:600}
+
+  .rodape-painel{
+    border-top:1px solid #E6E4DA;padding:12px 20px;display:flex;gap:8px;align-items:center;
+    background:#F4F3EC;
+  }
+  .btn-salvar{
+    background:#2B6A4E;color:#fff;border:0;padding:10px 20px;border-radius:8px;font-weight:600;
+  }
+  .btn-salvar:hover{background:#22573F}
+  .btn-neutro{background:#EAEFE9;border:0;color:var(--tinta);padding:10px 16px;border-radius:8px}
+  .btn-neutro:hover{background:#DCE4DC}
+  .btn-excluir{margin-left:auto;background:transparent;border:0;color:#963029;font-size:13px}
+  .btn-excluir:hover{text-decoration:underline}
+
+  .aviso{
+    position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);
+    background:#0F2C22;color:#fff;padding:10px 18px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.14);font-size:13.5px;z-index:60;
+    opacity:0;transition:.2s;pointer-events:none;
+  }
+  .aviso.on{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:640px){
+    header.topo{padding:12px}
+    .campo-busca input{width:150px}
+    main.quadro{padding:12px;gap:10px}
+    .coluna{flex-basis:264px}
+  }
+</style>
+
+<header class="topo">
+  <div class="marca">
+    <div class="cesta" aria-hidden="true">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#22180A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8h18l-1.6 11.2a2 2 0 0 1-2 1.8H6.6a2 2 0 0 1-2-1.8L3 8Z"/>
+        <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Minha Quitandinha</h1>
+      <span>Funil de condomínios</span>
+    </div>
+  </div>
+
+  <div class="ferramentas">
+    <div class="campo-busca">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar condomínio, bairro..." aria-label="Buscar">
+    </div>
+    <select class="filtro" id="filtroStatus" aria-label="Filtrar por situação">
+      <option value="">Todas as situações</option>
+      <option value="verde">🟢 Fechado com sucesso</option>
+      <option value="amarelo">🟡 Em andamento</option>
+      <option value="vermelho">🔴 Perdido / sem potencial</option>
+      <option value="nenhum">⚪ Sem situação definida</option>
+    </select>
+    <select class="filtro" id="filtroResp" aria-label="Filtrar por responsável">
+      <option value="">Todos os responsáveis</option>
+    </select>
+    <button class="btn" id="btnExportar">Exportar CSV</button>
+    <button class="btn btn-destaque" id="btnNovo">+ Novo condomínio</button>
+  </div>
+</header>
+
+<main class="quadro" id="quadro"></main>
+
+<div class="fundo-escuro" id="fundo"></div>
+
+<aside class="painel" id="painel" role="dialog" aria-modal="true" aria-labelledby="tituloPainel">
+  <div class="cabeca">
+    <h2 id="tituloPainel">Novo condomínio</h2>
+    <button class="fechar" id="btnFechar" aria-label="Fechar">✕</button>
+  </div>
+
+  <div class="corpo">
+    <fieldset>
+      <legend>Condomínio</legend>
+      <label class="campo"><span>Nome do condomínio</span><input class="txt" id="f_nome" placeholder="Ex.: Residencial Jardim das Acácias"></label>
+      <label class="campo"><span>Endereço completo</span><input class="txt" id="f_endereco" placeholder="Rua, número, bairro, cidade"></label>
+      <div class="linha">
+        <label class="campo"><span>Nº de apartamentos</span><input class="txt" id="f_aptos" type="number" min="0" placeholder="Ex.: 120"></label>
+        <label class="campo"><span>Fase do funil</span>
+          <select class="txt" id="f_fase"></select>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Síndico</legend>
+      <label class="campo"><span>Nome</span><input class="txt" id="f_sindico"></label>
+      <div class="linha">
+        <label class="campo"><span>Telefone / WhatsApp</span><input class="txt" id="f_sindicoTel" placeholder="(11) 90000-0000"></label>
+        <label class="campo"><span>E-mail</span><input class="txt" id="f_sindicoEmail" type="email"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Administradora</legend>
+      <label class="campo"><span>Empresa</span><input class="txt" id="f_admin"></label>
+      <div class="linha">
+        <label class="campo"><span>Pessoa de contato</span><input class="txt" id="f_adminContato"></label>
+        <label class="campo"><span>Telefone</span><input class="txt" id="f_adminTel"></label>
+      </div>
+      <label class="campo"><span>E-mail</span><input class="txt" id="f_adminEmail" type="email"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Concorrência</legend>
+      <div class="linha">
+        <label class="campo"><span>Concorrente no local</span><input class="txt" id="f_concorrente" placeholder="Deixe vazio se não houver"></label>
+        <label class="campo"><span>Fim do contrato</span><input class="txt" id="f_fimContrato" type="date"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Perfil e observações</legend>
+      <label class="campo"><span>Perfil dos moradores</span><textarea class="txt" id="f_perfil" placeholder="Famílias com crianças, classe média, muitos idosos, alta rotatividade..."></textarea></label>
+      <label class="campo"><span>Observações</span><textarea class="txt" id="f_notas" placeholder="O que ficou combinado, quem decide, próximos passos..."></textarea></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Situação e responsável</legend>
+      <label class="campo"><span>Quem cadastrou o lead</span><input class="txt" id="f_responsavel" placeholder="Nome de quem trouxe a oportunidade"></label>
+      <span style="display:block;font-size:12px;color:var(--tinta-suave);margin-bottom:6px">Situação da oportunidade</span>
+      <div class="semaforo" id="semaforo">
+        <label><input type="radio" name="status" value="verde"><i class="bolinha b-verde"></i>Fechado</label>
+        <label><input type="radio" name="status" value="amarelo"><i class="bolinha b-amarelo"></i>Em andamento</label>
+        <label><input type="radio" name="status" value="vermelho"><i class="bolinha b-vermelho"></i>Perdido</label>
+        <label><input type="radio" name="status" value="nenhum" checked><i class="bolinha b-nenhum"></i>Sem definir</label>
+      </div>
+    </fieldset>
+
+    <fieldset id="blocoHistorico" style="display:none">
+      <legend>Registro de atualizações</legend>
+      <div class="historico" id="historico"></div>
+    </fieldset>
+  </div>
+
+  <div class="rodape-painel">
+    <button class="btn-salvar" id="btnSalvar">Salvar</button>
+    <button class="btn-neutro" id="btnCancelar">Cancelar</button>
+    <button class="btn-excluir" id="btnExcluir" style="display:none">Excluir condomínio</button>
+  </div>
+</aside>
+
+<div class="aviso" id="aviso"></div>
+
+<script>
+const FASES = [
+  {id:"cadastro",  nome:"Cadastro de Oportunidade"},
+  {id:"contato",   nome:"Contato Realizado"},
+  {id:"reuniao",   nome:"Reunião"},
+  {id:"proposta",  nome:"Proposta Comercial"},
+  {id:"assembleia",nome:"Assembleia"},
+  {id:"contrato",  nome:"Assinatura de Contrato"}
+];
+const CHAVE = "quitandinha:condominios";
+const ROTULO_STATUS = {verde:"Fechado", amarelo:"Em andamento", vermelho:"Perdido", nenhum:"Sem situação"};
+
+let leads = [];
+let editandoId = null;
+let arrastandoId = null;
+
+/* ---------- utilidades ---------- */
+const $ = s => document.querySelector(s);
+const agora = () => new Date().toISOString();
+const gerarId = () => "c_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function dataBR(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  if(isNaN(d)) return "—";
+  return d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});
+}
+function diasDesde(iso){
+  if(!iso) return null;
+  return Math.floor((Date.now() - new Date(iso).getTime())/86400000);
+}
+function textoDias(n){
+  if(n === null) return "—";
+  if(n <= 0) return "hoje";
+  if(n === 1) return "ontem";
+  return "há " + n + " dias";
+}
+function escapar(s){
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function avisar(msg){
+  const el = $("#aviso");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove("on"), 2200);
+}
+
+/* ---------- persistência ---------- */
+async function carregar(){
+  try{
+    const r = await window.storage.get(CHAVE);
+    leads = r ? JSON.parse(r.value) : [];
+  }catch(e){
+    leads = [];
+  }
+  desenhar();
+}
+async function salvarTudo(){
+  try{
+    await window.storage.set(CHAVE, JSON.stringify(leads));
+  }catch(e){
+    avisar("Não foi possível salvar agora. Os dados seguem nesta sessão.");
+  }
+}
+
+/* ---------- quadro ---------- */
+function filtrar(){
+  const termo = $("#busca").value.trim().toLowerCase();
+  const st = $("#filtroStatus").value;
+  const resp = $("#filtroResp").value;
+  return leads.filter(l => {
+    if(st && (l.status || "nenhum") !== st) return false;
+    if(resp && (l.responsavel || "") !== resp) return false;
+    if(!termo) return true;
+    const alvo = [l.nome,l.endereco,l.sindico,l.admin,l.concorrente,l.perfil,l.notas,l.responsavel]
+      .join(" ").toLowerCase();
+    return alvo.includes(termo);
+  });
+}
+
+function desenhar(){
+  atualizarFiltroResp();
+  const visiveis = filtrar();
+  const total = visiveis.length || 1;
+  const quadro = $("#quadro");
+  quadro.innerHTML = "";
+
+  FASES.forEach(fase => {
+    const daFase = visiveis.filter(l => (l.fase || "cadastro") === fase.id)
+      .sort((a,b)=> (a.ordem ?? 0) - (b.ordem ?? 0));
+
+    const col = document.createElement("section");
+    col.className = "coluna";
+    col.dataset.fase = fase.id;
+    col.innerHTML =
+      '<div class="cabeca"><h2>' + escapar(fase.nome) + '</h2>' +
+      '<span class="contagem">' + daFase.length + '</span></div>' +
+      '<div class="trilha"><i style="width:' + Math.round(daFase.length/total*100) + '%"></i></div>' +
+      '<div class="lista" data-fase="' + fase.id + '"></div>' +
+      '<div class="rodape-coluna"><button class="add-coluna" data-add="' + fase.id + '">+ Adicionar condomínio</button></div>';
+
+    const lista = col.querySelector(".lista");
+    if(daFase.length === 0){
+      const v = document.createElement("p");
+      v.className = "vazio";
+      v.textContent = "Nenhum condomínio aqui. Arraste um cartão ou cadastre um novo.";
+      lista.appendChild(v);
+    } else {
+      daFase.forEach(l => lista.appendChild(montarCartao(l)));
+    }
+    quadro.appendChild(col);
+  });
+
+  ligarArrastar();
+}
+
+function montarCartao(l){
+  const st = l.status || "nenhum";
+  const el = document.createElement("article");
+  el.className = "cartao st-" + st;
+  el.draggable = true;
+  el.dataset.id = l.id;
+  el.tabIndex = 0;
+
+  const etiquetas = [];
+  if(l.aptos) etiquetas.push('<span class="etiqueta">' + escapar(l.aptos) + ' aptos</span>');
+  if(l.admin) etiquetas.push('<span class="etiqueta">' + escapar(l.admin) + '</span>');
+  if(l.concorrente){
+    const d = l.fimContrato ? Math.ceil((new Date(l.fimContrato) - Date.now())/86400000) : null;
+    let cls = "alerta", txt = escapar(l.concorrente);
+    if(d !== null){
+      if(d < 0){ cls = "perigo"; txt += " · contrato vencido"; }
+      else if(d <= 90){ cls = "perigo"; txt += " · vence em " + d + "d"; }
+      else txt += " · até " + dataBR(l.fimContrato);
+    }
+    etiquetas.push('<span class="etiqueta ' + cls + '">' + txt + '</span>');
+  }
+
+  const dias = diasDesde(l.atualizadoEm || l.criadoEm);
+  const inicial = (l.responsavel || "?").trim().charAt(0).toUpperCase() || "?";
+
+  el.innerHTML =
+    "<h3>" + escapar(l.nome || "Condomínio sem nome") + "</h3>" +
+    (l.endereco ? '<p class="endereco">' + escapar(l.endereco) + "</p>" : "") +
+    (etiquetas.length ? '<div class="etiquetas">' + etiquetas.join("") + "</div>" : "") +
+    '<div class="meta-cartao"><span>Atualizado ' + textoDias(dias) + "</span>" +
+    (l.responsavel ? '<span class="quem"><i class="inicial">' + escapar(inicial) + "</i>" + escapar(l.responsavel.split(" ")[0]) + "</span>" : "") +
+    "</div>";
+
+  el.addEventListener("click", () => abrirPainel(l.id));
+  el.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); abrirPainel(l.id); } });
+  return el;
+}
+
+/* ---------- arrastar e soltar ---------- */
+function ligarArrastar(){
+  document.querySelectorAll(".cartao").forEach(c => {
+    c.addEventListener("dragstart", () => {
+      arrastandoId = c.dataset.id;
+      c.classList.add("arrastando");
+    });
+    c.addEventListener("dragend", () => {
+      c.classList.remove("arrastando");
+      arrastandoId = null;
+      document.querySelectorAll(".coluna").forEach(x => x.classList.remove("alvo"));
+    });
+  });
+
+  document.querySelectorAll(".coluna").forEach(col => {
+    const lista = col.querySelector(".lista");
+    col.addEventListener("dragover", e => {
+      e.preventDefault();
+      col.classList.add("alvo");
+      const movel = document.querySelector(".arrastando");
+      if(!movel) return;
+      const vazio = lista.querySelector(".vazio");
+      if(vazio) vazio.remove();
+      const depois = alvoPosicao(lista, e.clientY);
+      if(depois == null) lista.appendChild(movel); else lista.insertBefore(movel, depois);
+    });
+    col.addEventListener("dragleave", e => {
+      if(!col.contains(e.relatedTarget)) col.classList.remove("alvo");
+    });
+    col.addEventListener("drop", async e => {
+      e.preventDefault();
+      col.classList.remove("alvo");
+      if(!arrastandoId) return;
+      const lead = leads.find(l => l.id === arrastandoId);
+      if(!lead) return;
+      const novaFase = col.dataset.fase;
+      const mudouFase = lead.fase !== novaFase;
+      lead.fase = novaFase;
+      [...lista.querySelectorAll(".cartao")].forEach((c,i) => {
+        const l = leads.find(x => x.id === c.dataset.id);
+        if(l) l.ordem = i;
+      });
+      if(mudouFase) registrarAtualizacao(lead, "Movido para " + FASES.find(f=>f.id===novaFase).nome);
+      await salvarTudo();
+      desenhar();
+      if(mudouFase) avisar(lead.nome ? lead.nome + " → " + FASES.find(f=>f.id===novaFase).nome : "Cartão movido");
+    });
+  });
+}
+function alvoPosicao(lista, y){
+  const outros = [...lista.querySelectorAll(".cartao:not(.arrastando)")];
+  let melhor = null, menor = Infinity;
+  outros.forEach(c => {
+    const r = c.getBoundingClientRect();
+    const dif = y - r.top - r.height/2;
+    if(dif < 0 && Math.abs(dif) < menor){ menor = Math.abs(dif); melhor = c; }
+  });
+  return melhor;
+}
+
+/* ---------- histórico ---------- */
+function registrarAtualizacao(lead, descricao){
+  lead.atualizadoEm = agora();
+  lead.historico = lead.historico || [];
+  lead.historico.unshift({quando: lead.atualizadoEm, o_que: descricao});
+  lead.historico = lead.historico.slice(0,40);
+}
+function resumoFrequencia(lead){
+  const h = lead.historico || [];
+  const criado = lead.criadoEm;
+  const linhas = [];
+  linhas.push("Cadastrado em <b>" + dataBR(criado) + "</b>");
+  linhas.push("Última atualização: <b>" + dataBR(lead.atualizadoEm) + "</b> (" + textoDias(diasDesde(lead.atualizadoEm)) + ")");
+  linhas.push("Total de atualizações: <b>" + h.length + "</b>");
+  if(h.length >= 2){
+    const t = h.map(x => new Date(x.quando).getTime());
+    let soma = 0;
+    for(let i=0;i<t.length-1;i++) soma += (t[i] - t[i+1]);
+    const media = soma / (t.length-1) / 86400000;
+    linhas.push("Frequência média: <b>a cada " + (media < 1 ? "menos de 1 dia" : media.toFixed(1) + " dias") + "</b>");
+  }
+  const ultimos = h.slice(0,5).map(x => "• " + dataBR(x.quando) + " — " + escapar(x.o_que)).join("<br>");
+  return linhas.join("<br>") + (ultimos ? "<br><br>" + ultimos : "");
+}
+
+/* ---------- painel ---------- */
+function preencherFases(){
+  $("#f_fase").innerHTML = FASES.map(f => '<option value="' + f.id + '">' + escapar(f.nome) + "</option>").join("");
+}
+function marcarSemaforo(){
+  document.querySelectorAll("#semaforo label").forEach(l => {
+    l.classList.toggle("on", l.querySelector("input").checked);
+  });
+}
+function limparFormulario(faseInicial){
+  ["f_nome","f_endereco","f_aptos","f_sindico","f_sindicoTel","f_sindicoEmail","f_admin",
+   "f_adminContato","f_adminTel","f_adminEmail","f_concorrente","f_fimContrato","f_perfil",
+   "f_notas","f_responsavel"].forEach(id => $("#"+id).value = "");
+  $("#f_fase").value = faseInicial || "cadastro";
+  document.querySelector('#semaforo input[value="nenhum"]').checked = true;
+  marcarSemaforo();
+}
+function abrirPainel(id, faseInicial){
+  editandoId = id || null;
+  preencherFases();
+  if(id){
+    const l = leads.find(x => x.id === id);
+    if(!l) return;
+    $("#tituloPainel").textContent = l.nome || "Condomínio sem nome";
+    $("#f_nome").value = l.nome || "";
+    $("#f_endereco").value = l.endereco || "";
+    $("#f_aptos").value = l.aptos || "";
+    $("#f_fase").value = l.fase || "cadastro";
+    $("#f_sindico").value = l.sindico || "";
+    $("#f_sindicoTel").value = l.sindicoTel || "";
+    $("#f_sindicoEmail").value = l.sindicoEmail || "";
+    $("#f_admin").value = l.admin || "";
+    $("#f_adminContato").value = l.adminContato || "";
+    $("#f_adminTel").value = l.adminTel || "";
+    $("#f_adminEmail").value = l.adminEmail || "";
+    $("#f_concorrente").value = l.concorrente || "";
+    $("#f_fimContrato").value = l.fimContrato || "";
+    $("#f_perfil").value = l.perfil || "";
+    $("#f_notas").value = l.notas || "";
+    $("#f_responsavel").value = l.responsavel || "";
+    const r = document.querySelector('#semaforo input[value="' + (l.status || "nenhum") + '"]');
+    if(r) r.checked = true;
+    marcarSemaforo();
+    $("#blocoHistorico").style.display = "";
+    $("#historico").innerHTML = resumoFrequencia(l);
+    $("#btnExcluir").style.display = "";
+  } else {
+    $("#tituloPainel").textContent = "Novo condomínio";
+    limparFormulario(faseInicial);
+    $("#blocoHistorico").style.display = "none";
+    $("#btnExcluir").style.display = "none";
+  }
+  $("#painel").classList.add("aberto");
+  $("#fundo").classList.add("aberto");
+  setTimeout(()=>$("#f_nome").focus(), 180);
+}
+function fecharPainel(){
+  $("#painel").classList.remove("aberto");
+  $("#fundo").classList.remove("aberto");
+  editandoId = null;
+}
+
+function lerFormulario(){
+  return {
+    nome: $("#f_nome").value.trim(),
+    endereco: $("#f_endereco").value.trim(),
+    aptos: $("#f_aptos").value.trim(),
+    fase: $("#f_fase").value,
+    sindico: $("#f_sindico").value.trim(),
+    sindicoTel: $("#f_sindicoTel").value.trim(),
+    sindicoEmail: $("#f_sindicoEmail").value.trim(),
+    admin: $("#f_admin").value.trim(),
+    adminContato: $("#f_adminContato").value.trim(),
+    adminTel: $("#f_adminTel").value.trim(),
+    adminEmail: $("#f_adminEmail").value.trim(),
+    concorrente: $("#f_concorrente").value.trim(),
+    fimContrato: $("#f_fimContrato").value,
+    perfil: $("#f_perfil").value.trim(),
+    notas: $("#f_notas").value.trim(),
+    responsavel: $("#f_responsavel").value.trim(),
+    status: (document.querySelector('#semaforo input:checked') || {}).value || "nenhum"
+  };
+}
+
+async function salvar(){
+  const dados = lerFormulario();
+  if(editandoId){
+    const l = leads.find(x => x.id === editandoId);
+    const mudouFase = l.fase !== dados.fase;
+    const mudouStatus = (l.status || "nenhum") !== dados.status;
+    Object.assign(l, dados);
+    let descricao = "Cadastro editado";
+    if(mudouFase) descricao = "Movido para " + FASES.find(f=>f.id===dados.fase).nome;
+    if(mudouStatus) descricao += " · situação: " + ROTULO_STATUS[dados.status];
+    registrarAtualizacao(l, descricao);
+    avisar("Alterações salvas");
+  } else {
+    const novo = Object.assign({
+      id: gerarId(),
+      criadoEm: agora(),
+      atualizadoEm: agora(),
+      ordem: leads.length,
+      historico: [{quando: agora(), o_que: "Condomínio cadastrado"}]
+    }, dados);
+    leads.push(novo);
+    avisar("Condomínio cadastrado");
+  }
+  await salvarTudo();
+  fecharPainel();
+  desenhar();
+}
+
+async function excluir(){
+  if(!editandoId) return;
+  const l = leads.find(x => x.id === editandoId);
+  if(!confirm("Excluir \"" + (l.nome || "este condomínio") + "\"? Essa ação não pode ser desfeita.")) return;
+  leads = leads.filter(x => x.id !== editandoId);
+  await salvarTudo();
+  fecharPainel();
+  desenhar();
+  avisar("Condomínio excluído");
+}
+
+/* ---------- filtro de responsáveis + exportação ---------- */
+function atualizarFiltroResp(){
+  const sel = $("#filtroResp");
+  const atual = sel.value;
+  const nomes = [...new Set(leads.map(l => l.responsavel).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Todos os responsáveis</option>' +
+    nomes.map(n => '<option value="' + escapar(n) + '">' + escapar(n) + "</option>").join("");
+  if(nomes.includes(atual)) sel.value = atual;
+}
+
+function exportarCSV(){
+  if(!leads.length){ avisar("Não há condomínios para exportar"); return; }
+  const cab = ["Condomínio","Endereço","Apartamentos","Fase","Situação","Síndico","Telefone síndico",
+    "E-mail síndico","Administradora","Contato administradora","Telefone administradora",
+    "E-mail administradora","Concorrente","Fim do contrato","Perfil dos moradores","Observações",
+    "Cadastrado por","Data de cadastro","Última atualização","Nº de atualizações"];
+  const linhas = leads.map(l => [
+    l.nome, l.endereco, l.aptos,
+    (FASES.find(f=>f.id===l.fase)||{}).nome, ROTULO_STATUS[l.status||"nenhum"],
+    l.sindico, l.sindicoTel, l.sindicoEmail, l.admin, l.adminContato, l.adminTel, l.adminEmail,
+    l.concorrente, l.fimContrato ? dataBR(l.fimContrato) : "", l.perfil, l.notas, l.responsavel,
+    dataBR(l.criadoEm), dataBR(l.atualizadoEm), (l.historico||[]).length
+  ]);
+  const csv = [cab, ...linhas]
+    .map(r => r.map(c => '"' + String(c ?? "").replace(/"/g,'""') + '"').join(";"))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "minha-quitandinha-condominios.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  avisar("CSV gerado");
+}
+
+/* ---------- eventos ---------- */
+$("#btnNovo").addEventListener("click", () => abrirPainel(null));
+$("#btnFechar").addEventListener("click", fecharPainel);
+$("#btnCancelar").addEventListener("click", fecharPainel);
+$("#fundo").addEventListener("click", fecharPainel);
+$("#btnSalvar").addEventListener("click", salvar);
+$("#btnExcluir").addEventListener("click", excluir);
+$("#btnExportar").addEventListener("click", exportarCSV);
+$("#busca").addEventListener("input", desenhar);
+$("#filtroStatus").addEventListener("change", desenhar);
+$("#filtroResp").addEventListener("change", desenhar);
+$("#semaforo").addEventListener("change", marcarSemaforo);
+document.addEventListener("keydown", e => { if(e.key === "Escape") fecharPainel(); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-add]");
+  if(b) abrirPainel(null, b.dataset.add);
+});
+
+preencherFases();
+carregar();
+</script>
